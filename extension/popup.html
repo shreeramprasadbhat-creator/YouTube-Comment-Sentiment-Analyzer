@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Sentiment Analyzer</title>
+
+    <style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    width:390px;
+    padding:18px;
+    font-family:'Segoe UI',Arial,sans-serif;
+    background:#0f172a;
+    color:#f8fafc;
+}
+
+h2{
+    text-align:center;
+    color:#60a5fa;
+    margin-bottom:15px;
+}
+
+h3{
+    color:#cbd5e1;
+    margin-bottom:10px;
+}
+
+/* Buttons */
+
+.primary-btn,
+#showCommentsBtn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    color:white;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.primary-btn:hover,
+#showCommentsBtn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(37,99,235,.4);
+}
+
+/* Status */
+
+.status{
+    text-align:center;
+    font-weight:bold;
+    margin:15px 0;
+    color:#38bdf8;
+}
+
+/* Cards */
+
+.card{
+    background:#1e293b;
+    border:1px solid #334155;
+    border-radius:14px;
+    padding:15px;
+    margin-bottom:15px;
+}
+
+.count{
+    font-size:26px;
+    font-weight:bold;
+    margin-top:8px;
+}
+
+/* Search */
+
+input{
+    width:100%;
+    padding:10px;
+    margin:15px 0;
+    border-radius:10px;
+    border:1px solid #334155;
+    background:#1e293b;
+    color:white;
+    outline:none;
+}
+
+input::placeholder{
+    color:#94a3b8;
+}
+
+/* Filter Buttons */
+
+.filters{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.filter-btn{
+    flex:1;
+    padding:10px;
+    border-radius:22px;
+    background:#1e293b;
+    color:white;
+    border:2px solid transparent;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+    transition:.25s;
+}
+
+.filter-btn:hover{
+    background:#334155;
+}
+
+.filter-btn.active{
+    background:#2563eb;
+    border-color:#2563eb;
+    color:white;
+}
+
+.positive-btn{
+    border-color:#22c55e;
+}
+
+.neutral-btn{
+    border-color:#f59e0b;
+}
+
+.negative-btn{
+    border-color:#ef4444;
+}
+
+/* Comments */
+
+#searchResults{
+    max-height:250px;
+    overflow-y:auto;
+}
+
+.comment{
+    background:#1e293b;
+    border-left:6px solid gray;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+.comment.positive{
+    border-color:#22c55e;
+}
+
+.comment.neutral{
+    border-color:#f59e0b;
+}
+
+.comment.negative{
+    border-color:#ef4444;
+}
+
+small{
+    color:#94a3b8;
+}
+
+/* Progress */
+
+progress{
+    width:100%;
+    height:14px;
+    margin-bottom:12px;
+}
+
+/* Dropdown */
+
+select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #334155;
+    background:#1e293b;
+    color:white;
+    margin-bottom:15px;
+}
+
+hr{
+    border:none;
+    border-top:1px solid #334155;
+    margin:20px 0;
+}
+
+#topCommentsList{
+    padding-left:20px;
+}
+
+#topCommentsList li{
+    margin-bottom:10px;
+}
+
+    </style>
+</head>
+<body>
+
+<h2>😊 Sentiment Analyzer</h2>
+
+<button id="analyzeBtn" class="primary-btn">
+    🚀 Analyze Comments
+</button>
+
+<div class="status" id="status">Ready</div>
+
+<div class="card">
+    <b>Overall Sentiment</b>
+    <div class="count" id="overallSentiment">Waiting...</div>
+</div>
+
+<div class="card">
+    <b>Total Comments</b>
+    <div class="count" id="total">0</div>
+</div>
+
+<div class="card">
+    <b>Positive Comments</b>
+    <div class="count" id="positiveCount">0</div>
+</div>
+
+<div class="card">
+    <b>Neutral Comments</b>
+    <div class="count" id="neutralCount">0</div>
+</div>
+
+<div class="card">
+    <b>Negative Comments</b>
+    <div class="count" id="negativeCount">0</div>
+</div>
+
+<div class="card">
+
+    <h3>📊 Sentiment Distribution</h3>
+
+    <p>😊 Positive: <span id="positivePercent">0%</span></p>
+    <progress id="positiveBar" value="0" max="100"></progress>
+
+    <p>😐 Neutral: <span id="neutralPercent">0%</span></p>
+    <progress id="neutralBar" value="0" max="100"></progress>
+
+    <p>😞 Negative: <span id="negativePercent">0%</span></p>
+    <progress id="negativeBar" value="0" max="100"></progress>
+
+</div>
+
+<input
+    type="text"
+    id="searchBox"
+    placeholder="🔍 Search comments..."
+>
+
+<div class="filters">
+
+    <button class="filter-btn positive-btn" data-filter="positive">
+        🟢 Positive
+    </button>
+
+    <button class="filter-btn neutral-btn" data-filter="neutral">
+        🟡 Neutral
+    </button>
+
+    <button class="filter-btn negative-btn" data-filter="negative">
+        🔴 Negative
+    </button>
+
+</div>
+
+<h3>🔍 Search Results</h3>
+
+<div id="searchResults"></div>
+
+<hr>
+
+<h3>🏆 View Top Comments</h3>
+
+<select id="commentType">
+
+    <option value="positive">
+        😊 Positive
+    </option>
+
+    <option value="neutral">
+        😐 Neutral
+    </option>
+
+    <option value="negative">
+        😞 Negative
+    </option>
+
+</select>
+
+<button id="showCommentsBtn">
+    Show Comments
+</button>
+
+<ul id="topCommentsList"></ul>
+
+<script src="popup.js"></script>
+
+</body>
+</html>
