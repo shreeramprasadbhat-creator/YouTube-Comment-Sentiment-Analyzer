@@ -1,38 +1,17 @@
-from transformers import pipeline
-
-# Load model once
-classifier = pipeline(
-    "sentiment-analysis",
-    model="cardiffnlp/twitter-roberta-base-sentiment-latest"
-)
+from textblob import TextBlob
 
 
 def analyze_sentiment(text):
-    """
-    Returns:
-    {
-        "label": "Positive",
-        "confidence": 98.5
-    }
-    """
+    polarity = TextBlob(text).sentiment.polarity
 
-    result = classifier(
-        text,
-        truncation=True,
-        max_length=512
-    )[0]
-
-    label = result["label"].lower()
-    confidence = round(result["score"] * 100, 2)
-
-    if "positive" in label:
+    if polarity > 0.1:
         sentiment = "Positive"
-
-    elif "negative" in label:
+    elif polarity < -0.1:
         sentiment = "Negative"
-
     else:
         sentiment = "Neutral"
+
+    confidence = round(min(abs(polarity) * 100, 100), 2)
 
     return {
         "label": sentiment,
