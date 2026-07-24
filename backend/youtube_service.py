@@ -70,7 +70,9 @@ def get_comments(video_id):
                 if len(neutral_comments) < 3:
                     neutral_comments.append(comment)
 
+        
         next_page_token = response.get("nextPageToken")
+        
 
         if not next_page_token:
             break

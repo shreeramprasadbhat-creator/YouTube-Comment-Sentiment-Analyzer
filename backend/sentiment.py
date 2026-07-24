@@ -11,24 +11,28 @@ def analyze_sentiment(text):
     """
     Returns:
     {
-        "label": "Positive 😊",
+        "label": "Positive",
         "confidence": 98.5
     }
     """
 
-    result = classifier(text[:512])[0]
+    result = classifier(
+        text,
+        truncation=True,
+        max_length=512
+    )[0]
 
     label = result["label"].lower()
     confidence = round(result["score"] * 100, 2)
 
     if "positive" in label:
-        sentiment = "Positive 😊"
+        sentiment = "Positive"
 
     elif "negative" in label:
-        sentiment = "Negative 😞"
+        sentiment = "Negative"
 
     else:
-        sentiment = "Neutral 😐"
+        sentiment = "Neutral"
 
     return {
         "label": sentiment,
